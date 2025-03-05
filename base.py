@@ -11,6 +11,3 @@ with open('config.toml', 'rb') as f:
     except:
         pass
 
-class PyButton:
-    def __init__(self,x,y,length,text,fg='black',bg='white'):
-        pass
