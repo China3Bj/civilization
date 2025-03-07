@@ -1,5 +1,6 @@
 [local]
 FPS=60
+assetsLink="assets/assets.json"
 
 [window]
 height=850

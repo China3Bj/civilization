@@ -1,0 +1,9 @@
+{
+  "texture": {
+    "btn": {
+      "left":"assets/textures/leftBtn.png",
+      "middle":"assets/textures/middleBtn.png",
+      "right":"assets/textures/rightBtn.png"
+    }
+  }
+}
