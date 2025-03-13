@@ -64,7 +64,7 @@ with open('config.toml', 'rb') as f:
         __ass=config['local']['assetsLink']
 
 
-        local=locale.getdefaultlocale(locale.LC_ALL)#zh-CN
+        local=locale.getdefaultlocale()#zh-CN
         lang=config['local']['lang']
         if lang=='auto':
             lang=setupLang(local)
@@ -117,19 +117,6 @@ def set_console_color(color):
     ctypes.windll.kernel32.GetConsoleScreenBufferInfo(h, ctypes.byref(csbi))
     # 设置新的文本和背景属性
     ctypes.windll.kernel32.SetConsoleTextAttribute(h, color)
-
-if debug:
-    print('-'*15,"DEBUG",'-'*15)
-    print('info: pygameVer:', pygame.__version__)
-    print('info: numbaVer:',numba.__version__)
-    print('info: Locale:',local)
-
-
-
-    set_console_color(FOREGROUND_RED | FOREGROUND_INTENSITY)  # 设置为红色高亮文本
-    print("这是一个红色的文本")
-    set_console_color(FOREGROUND_GREEN | FOREGROUND_INTENSITY)  # 更改颜色为绿色高亮文本
-    print("这是一个绿色的文本")
 
 class PyButton:
     def __init__(self,surface:pygame.Surface,x,y,length):
