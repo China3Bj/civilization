@@ -1,6 +1,5 @@
 import traceback
 import locale
-import numba
 import os
 import sys
 import pygame
@@ -8,6 +7,9 @@ import tomllib
 from tkinter import *
 from tkinter.messagebox import *
 import json
+import time
+import ctypes
+import local.color as col
 
 pygame.init()
 erronBuffer= (b'\x00\x00\x00\x00\x00\x00\xff\x00\xff\xff\x00\xff\x00\x00\x00\x00\x00\x00\xff\x00\xff\xff\x00\xff\xff'
@@ -37,6 +39,18 @@ class ConfigDict(dict):
         if type(__g)==dict:
             __g=ConfigDict(__g)
         return __g
+
+def loadImg(assets: AssetsDict|str):
+    if type(assets)==str:
+        try:
+            return pygame.image.load(assets)
+        except:
+            return assets
+    else:
+        new=AssetsDict()
+        for index,items in assets.items():
+            new[index]=loadImg(items)
+        return new
 
 
 def showErr(title,err):
@@ -81,13 +95,25 @@ with open('config.toml', 'rb') as f:
             print("Var \"lang\" is not found!", file=sys.stderr)
             showErr('Runtime Error!', "Var \"lang\" is not found!")
             os.kill(os.getpid(), -1)
+
+        try:
+            with open(assetsLink.keyPos, 'rb') as f2:
+                keyPos = AssetsDict(json.load(f2))
+        except FileNotFoundError:
+            traceback.print_exc()
+            print("Var \"KeyPos\" is not found!", file=sys.stderr)
+            showErr('Runtime Error!', "Var \"KeyPos\" is not found!")
+            os.kill(os.getpid(), -1)
+
+        fonts= {}
+        for _1,_2 in assetsLink.fonts.items():
+            fonts[_1]=pygame.font.Font(_2,0)
+
     except Exception:
         traceback.print_exc()
         print('Reading "config.toml" error!', file=sys.stderr)
         showErr('Runtime Error!', 'Reading "config.toml" error!')
         os.kill(os.getpid(), -1)
-
-import ctypes
 
 # 设置控制台文本颜色
 STD_OUTPUT_HANDLE = -11
@@ -130,6 +156,36 @@ class PyButton:
 
     def update(self):
         self.surface.blit(self.__leftImg,(self.x,self.y))
+
+
+def printf(*args,**kwargs):
+    try:
+        typ=kwargs['type']
+        del kwargs['type']
+    except KeyError:
+        typ="info"
+    try:
+        co=kwargs['color']
+        del kwargs['color']
+    except KeyError:
+        co=(col.RESET,)
+    try:
+        sep=kwargs['sep']
+        del kwargs['sep']
+    except KeyError:
+        sep=' '
+    try:
+        shown=kwargs['shown']
+        del kwargs['shown']
+    except KeyError:
+        shown=col.BLUE
+    g=time.strftime("%Y.%d.%m %X",time.localtime(time.time()))
+    text=sep.join(map(str,args))
+    text=col.changeColor(text,co)
+    print(f'\033[95m[\033[96m{g}\033[95m] \033[{shown}m({typ})\033[0m',text,**kwargs)
+
+def debug(*args,**kwargs):
+    if config['program']['debug']:printf(*args,**kwargs,type='debug')
 
 if __name__=="__main__":
     pass

@@ -5,5 +5,9 @@
       "middle":"assets/textures/middleBtn.png",
       "right":"assets/textures/rightBtn.png"
     }
+  },
+  "keyPos": "assets/keypos.json",
+  "fonts": {
+    "arial":"assets/font/arial.ttf"
   }
 }

@@ -1,13 +1,16 @@
 from  pygame import display
 import pygame.display
 from pygame.locals import *
-import time
 from base import *
 import local.color as col
+import numba
+import localFunction
 
 
 class Scene:
-    def __init__(self,name='.',child=None):
+    def __init__(self,surface,texture,name='.',child=None):
+        self.surface=surface
+        self.texture=texture
         self.name=name
         self.children=[] if child is None else child
     def update(self,*args,**kwargs):
@@ -16,35 +19,10 @@ class Scene:
     def __getattr__(self, item):
         return self.children[item]
 
-def printf(*args,**kwargs):
-    try:
-        typ=kwargs['type']
-        del kwargs['type']
-    except KeyError:
-        typ="info"
-    try:
-        co=kwargs['color']
-        del kwargs['color']
-    except KeyError:
-        co=(col.RESET,)
-    try:
-        sep=kwargs['sep']
-        del kwargs['sep']
-    except KeyError:
-        sep=' '
-    try:
-        shown=kwargs['shown']
-        del kwargs['shown']
-    except KeyError:
-        shown=col.BLUE
-    g=time.strftime("%Y.%d.%m %X",time.localtime(time.time()))
-    text=sep.join(map(str,args))
-    text=col.changeColor(text,co)
-    print(f'\033[95m[\033[96m{g}\033[95m] \033[{shown}m({typ})\033[0m',text,**kwargs)
-
-def debug(*args,**kwargs):
-    if config['program']['debug']:printf(*args,**kwargs,type='debug')
-
+class WelcomeWindow(Scene):
+    def __init__(self,surface,texture):
+        button1=localFunction.ButtonPy(surface,texture,200,200,'Welcome',100)
+        super().__init__(surface,texture,'.welcome',[button1])
 
 class MainGame:
     def __init__(self,*args,**kwargs):
@@ -63,9 +41,15 @@ class MainGame:
             printf(f"ARGS INFO:\n__args: {self.__args}\n__kwargs: {self.__kwargs}",type='debug')
             debug(f"Screen Info: {self.__screenInfo}")
 
-
         self.surface=pygame.display.set_mode((config['window']['weight'],config['window']['height']))
         self.clock=pygame.time.Clock()
+
+        #const value
+        self.real_size=(config['window']['weight'],config['window']['height'])
+        self.assetsImg = None
+        self.fullscreen=False
+        self.welcomewindow=None
+        self.welcomewindowActive=True
         # Game Init
         self.gameInit()
 
@@ -75,14 +59,18 @@ class MainGame:
                 if event.type == QUIT:
                     self.gameQuit()
                 elif event.type == KEYDOWN:
-                    if event.key == K_F11:
+                    debug(f'KEY DOWN:{event.key}')
+                    if event.key in keyPos.fullscreen:
                         # 切换全屏模式
-                        debug('FULLSCREEN!')
+                        debug('FULLSCREEN!'+str(self.fullscreen))
+                        self.surface=pygame.display.set_mode(self.real_size if self.fullscreen else self.__screenInfo, pygame.FULLSCREEN if self.fullscreen else pygame.RESIZABLE)
+                        self.fullscreen^=1
                         pygame.display.toggle_fullscreen()
                     elif event.key==K_ESCAPE:
                         self.gameQuit()
 
             self.surface.fill('white')
+            self.gameUpdate()
             pygame.display.update()
             self.clock.tick(config['local']['FPS'])
 
@@ -90,6 +78,10 @@ class MainGame:
 
         if config['program']['debug']:
             printf("-"*10,"EXIT","-"*10)
+
+    def gameUpdate(self):
+        if self.welcomewindowActive:
+            self.welcomewindow.update()
 
     def gameQuit(self):
         # todo GameQuit
@@ -99,7 +91,10 @@ class MainGame:
     def gameInit(self):
         # todo GameInit
         debug('GAME INIT FUNCTION')
-        pygame.display.set_mode((config['window']['weight'],config['window']['height']),pygame.RESIZABLE)
+        pygame.display.set_mode(self.real_size,pygame.RESIZABLE)
+        self.assetsImg=loadImg(assetsLink.texture)
+        debug('assetsInfo:'+str(self.assetsImg))
+        self.welcomewindow=WelcomeWindow(self.surface,self.assetsImg)
 
     def gameError(self, defence):
         printf(defence,shown=col.RED,color=(col.LIGHT_RED,col.BOLD_UNDERLINE),type='error')
