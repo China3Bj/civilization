@@ -20,6 +20,7 @@ class AssetsDict(dict):
         self.from_=''
         if 'from_' in kwargs:
             self.from_=kwargs['from_']
+            del kwargs['from_']
         super().__init__(*args,**kwargs)
     def __getattr__(self, item):
         __g=self[item]
@@ -107,7 +108,7 @@ with open('config.toml', 'rb') as f:
 
         fonts= {}
         for _1,_2 in assetsLink.fonts.items():
-            fonts[_1]=pygame.font.Font(_2,0)
+                fonts[_1]=pygame.font.Font(_2,0)
 
     except Exception:
         traceback.print_exc()
