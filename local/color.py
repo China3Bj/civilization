@@ -17,12 +17,17 @@ GRAY_BG=47
 
 RESET=0
 BOLD=1
+LIGHT=1
+DARK=2
 ITALIC=3
 UNDERLINE=4
+FLICKER=5
 REVERT=7
+NULL=8
 DELETE_LINE=9
 BOLD_UNDERLINE=21
 BLOCK=51
+THIN_UNDERLINE=52
 
 LIGHT_BLACK=30+60
 LIGHT_RED=31+60
@@ -39,4 +44,8 @@ def changeColor(text,color:tuple):
     return tx
 
 if __name__=="__main__":
-    print(changeColor('HELLO WORLD',(LIGHT_RED,BOLD_UNDERLINE)))
+    lst=[
+        changeColor('HELLO WORLD', (LIGHT_RED, BOLD_UNDERLINE, FLICKER, LIGHT, THIN_UNDERLINE, ITALIC))
+        for col in (RED,)
+    ]
+    print()

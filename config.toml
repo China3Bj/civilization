@@ -1,5 +1,6 @@
 [local]
 FPS=60
+TPS=20
 assetsLink="assets/assets.json"
 lang='auto'
 

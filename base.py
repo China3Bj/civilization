@@ -106,15 +106,18 @@ with open('config.toml', 'rb') as f:
             showErr('Runtime Error!', "Var \"KeyPos\" is not found!")
             os.kill(os.getpid(), -1)
 
-        fonts= {}
-        for _1,_2 in assetsLink.fonts.items():
-                fonts[_1]=pygame.font.Font(_2,0)
+        fonts = {}
 
     except Exception:
         traceback.print_exc()
         print('Reading "config.toml" error!', file=sys.stderr)
         showErr('Runtime Error!', 'Reading "config.toml" error!')
         os.kill(os.getpid(), -1)
+
+def loadFonts():
+    for _1, _2 in assetsLink.fonts.items():
+        for i in range(20,302,10):
+            fonts[_1+"_"+str(i)] = pygame.font.Font(_2, i)
 
 # 设置控制台文本颜色
 STD_OUTPUT_HANDLE = -11

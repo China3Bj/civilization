@@ -1,9 +1,9 @@
 {
   "texture": {
     "btn": {
-      "left":"assets/textures/leftBtn.png",
-      "middle":"assets/textures/middleBtn.png",
-      "right":"assets/textures/rightBtn.png"
+      "left":"assets/textures/btn/leftBtn.png",
+      "middle":"assets/textures/btn/middleBtn.png",
+      "right":"assets/textures/btn/rightBtn.png"
     }
   },
   "keyPos": "assets/keypos.json",
