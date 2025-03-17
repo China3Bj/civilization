@@ -117,4 +117,4 @@ class MainGame:
 
 if __name__=="__main__":
     MainGame()
-    print('welcome_demo2')
+    print('welcome_demo')
