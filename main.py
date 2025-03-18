@@ -1,5 +1,5 @@
 import threading
-import traceback
+from pygame import *
 from  pygame import display
 import pygame.display
 from pygame.locals import *
@@ -19,6 +19,9 @@ class Scene:
     def update(self,*args,**kwargs):
         for i in self.children:
             i.update(*args,**kwargs)
+    def tick(self,typ,*args):
+        for i in self.children:
+            i.tick(typ,*args)
     def __getattr__(self, item):
         return self.children[item]
 
@@ -55,6 +58,7 @@ class MainGame:
             self.fullscreen=False
             self.welcomewindow=None
             self.welcomewindowActive=True
+            self.mousePos=Vector2(0,0)
             # Game Init
             self.gameInit()
 
@@ -74,6 +78,8 @@ class MainGame:
                             pygame.display.toggle_fullscreen()
                         elif event.key==K_ESCAPE:
                             self.gameQuit()
+                    elif event.type == MOUSEMOTION:
+                        self.mousePos=Vector2(event.pos)
 
                 self.surface.fill('white')
                 self.gameUpdate()
@@ -89,6 +95,8 @@ class MainGame:
 
     def gameTick(self):
         while self.running:
+            if self.welcomewindowActive:
+                self.welcomewindow.tick(MOUSE_MOTION,self.mousePos)
             self.tick.tick(config['local']['TPS'])
 
     def gameUpdate(self):
