@@ -8,6 +8,7 @@ import local.color as col
 import numba
 import localFunction
 from local.color import *
+import ctypes
 
 
 class Scene:
@@ -36,6 +37,21 @@ class MainGame:
             self.__args=args
             self.__kwargs=kwargs
             self.__screenInfo=pygame.display.list_modes()[0]
+
+            # 设置进程为 DPI 感知模式（支持多显示器不同缩放比例）
+            ctypes.windll.shcore.SetProcessDpiAwareness(2)  # 2 = 每显示器 DPI 感知
+
+            def get_scaling_factor():
+                # 获取当前显示器的 DPI 值
+                hdc = ctypes.windll.user32.GetDC(0)
+                dpi_x = ctypes.windll.gdi32.GetDeviceCaps(hdc, 88)  # 88 = LOGPIXELSX
+                ctypes.windll.user32.ReleaseDC(0, hdc)
+
+                # 计算缩放倍率（默认 96 DPI 为 100% 缩放）
+                return round(dpi_x / 96, 2)
+
+            self.dpiScl=get_scaling_factor()
+
             if config['program']['debug']:
                 printf("-"*10,"DEBUG VERSION","-"*10,color=(col.BLUE,))
                 printf('CHECKING VERSION',color=(col.LIGHT_RED,))
@@ -47,6 +63,7 @@ class MainGame:
                 print()
                 printf(f"ARGS INFO:\n__args: {self.__args}\n__kwargs: {self.__kwargs}",type='debug')
                 debug(f"Screen Info: {self.__screenInfo}")
+                debug(f"DPI SCALE: {get_scaling_factor()}")  # 示例输出：1.25（125% 缩放）
 
             self.surface=pygame.display.set_mode((config['window']['weight'],config['window']['height']))
             self.clock=pygame.time.Clock()
