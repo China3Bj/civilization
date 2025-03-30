@@ -54,4 +54,4 @@ If you have any ideas, please contact us! [Our information](#contact-us)
 
 ## *__Welcome newcomers!!!__* 👍👍👍
 - <img src="https://avatars.githubusercontent.com/u/205504373?v=4" height="30" width="30"></img>
-([xuan-han-bz])
+([xuan-han-bz](https://github.com/xuan-han-bz))
