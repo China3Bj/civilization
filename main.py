@@ -141,4 +141,5 @@ class MainGame:
         os.kill(os.getpid(), -1)
 
 if __name__=="__main__":
+    print("denxu")
     MainGame()
