@@ -117,7 +117,7 @@ with open('config.toml', 'rb') as f:
 
 def loadFonts():
     for _1, _2 in assetsLink.fonts.items():
-        for i in range(20,302,10):
+        for i in range(20,302,1):
             fonts[_1+"_"+str(i)] = pygame.font.Font(_2, i)
 
 # 设置控制台文本颜色
