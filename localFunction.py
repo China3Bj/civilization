@@ -1,69 +1,18 @@
+import pygame.color
 from base import *
 
 
-def rgb_to_hsv(r, g, b):
-    r, g, b = r / 255.0, g / 255.0, b / 255.0
-    cmax = max(r, g, b)
-    cmin = min(r, g, b)
-    delta = cmax - cmin
-
-    if delta == 0:
-        h = 0
-    elif cmax == r:
-        h = ((g - b) / delta) % 6
-    elif cmax == g:
-        h = ((b - r) / delta) + 2
-    else:
-        h = ((r - g) / delta) + 4
-
-    h = h * 60
-    if h < 0:
-        h += 360
-
-    if cmax == 0:
-        s = 0
-    else:
-        s = delta / cmax
-
-    v = cmax
-
-    return h, s, v
-
-
-def hsv_to_rgb(h, s, v):
-    h = h % 360
-    c = v * s
-    x = c * (1 - abs((h / 60) % 2 - 1))
-    m = v - c
-
-    if 0 <= h < 60:
-        r1, g1, b1 = c, x, 0
-    elif 60 <= h < 120:
-        r1, g1, b1 = x, c, 0
-    elif 120 <= h < 180:
-        r1, g1, b1 = 0, c, x
-    elif 180 <= h < 240:
-        r1, g1, b1 = 0, x, c
-    elif 240 <= h < 300:
-        r1, g1, b1 = x, 0, c
-    else:
-        r1, g1, b1 = c, 0, x
-
-    r = (r1 + m) * 255
-    g = (g1 + m) * 255
-    b = (b1 + m) * 255
-
-    return r, g, b
-
-
 def mixin(col1: pygame.color.Color, col2: pygame.color.Color, perc):
-    mixin1 = rgb_to_hsv(col1.r, col1.g, col1.b)
-    mixin2 = rgb_to_hsv(col2.r, col2.g, col2.b)
-    if mixin1[0] == 0:
-        mixin1 = (list(mixin1))
-        mixin1[0] = mixin2[0]
-        mixin1 = tuple(mixin1)
-    now = hsv_to_rgb(*[
+    """
+    GRB色彩混合
+    :param col1: 色彩1
+    :param col2: 色彩2
+    :param perc: 色彩混合百分比
+    :return: 混合后的色彩
+    """
+    mixin1 = (col1.r, col1.g, col1.b)
+    mixin2 = (col2.r, col2.g, col2.b)
+    now = ([
         (mixin1[i] * perc + mixin2[i] * (1 - perc)) for i in range(3)
     ])
     return now
@@ -72,14 +21,57 @@ def mixin(col1: pygame.color.Color, col2: pygame.color.Color, perc):
 class Widget:  # todo Widget
     pass
 
+class Scene:
+    def __init__(self, master, texture=None, name='.', child=None):
+        """
+        场景类
+        :param master: 父窗口
+        :param texture: 材质
+        :param name: 名称（默认为`"."`）
+        :param child: 子窗口
+        """
+        self.master=master
+        self.dpiscale = master.dpiScl
+        self.surface = master.surface
+        self.texture = texture
+        self.name = name
+        self.children = [] if child is None else child
+
+    def update(self, *args, **kwargs):
+        """刷新方法"""
+        for i in self.children:
+            i.update(*args, **kwargs)
+
+    def tick(self, typ, *args):
+        """刻方法"""
+        for i in self.children:
+            i.tick(typ, *args)
+
+    def __getattr__(self, item):
+        return self.children[item]
 
 class ButtonPy:
-    def __init__(self, surface, texture, x, y, text, length, weight=-1, fg='black', bg='gray', hovcolor='blue',
-                 activecolor='gray', fontsize=30):
+    def __init__(self, master, texture, x, y, text, length, weight=-1, fg='black', bg='#dddddd', hovcolor='#2070a9',
+                 activecolor='#606069', fontsize=30):
+        """
+        按钮类，一堆石山。。。。。
+        :param master: 父窗口
+        :param texture: 按钮材质
+        :param x: 坐标x
+        :param y: 坐标y
+        :param text: 文本
+        :param length: 长度
+        :param weight: 宽度
+        :param fg: 前景色
+        :param bg: 背景色
+        :param hovcolor: 悬挂颜色
+        :param activecolor: 执行颜色
+        :param fontsize: 字体
+        """
         self.rect: pygame.rect.Rect | pygame.rect.RectType | None = None
         self.scale = 1
         self.transition = 20  #tick
-        self.surface: pygame.Surface = surface
+        self.surface: pygame.Surface = master.surface
         self.center = pygame.Vector2(self.surface.get_size()) / 2
         self.texture = texture
         self.pos = pygame.Vector2(x, y)
@@ -113,43 +105,25 @@ class ButtonPy:
         self.center = pygame.Vector2(center)
 
     def tick(self, typ, *args):
-        if typ == MOUSE_MOTION:
+        """
+        刻循环
+        :param typ:
+        :param args:
+        :return:
+        """
+        if typ == MOUSE_MOTION or typ == MOUSE_CLICK:
             col = False
             if self.rect is not None:
-                col = self.rect.collidepoint(*args)
+                col = self.rect.collidepoint(*args[0])
             if col:  # 如果碰撞
-                self.hov = col  #设置状态 (1)
-                if self.__hovTime == -1 and self.__hovHave==self.hov:     # 如果延时为-1，不存在延迟颜色（）
-                    self.__hovTime = self.transition                # 重置延时
-                    self.__bgNow = self.bg                          # 设置现在的背景为正常背景
-                    self.__hovHave = 0                              # 存在颜色设置为 0
-                elif self.__hovTime <= 0 and self.__hovHave!=self.hov:        # 如果延时<=0（延时完成），并存在颜色
-                    self.__bgNow = self.hovcolor                    # 设置背景为悬浮颜色
-                    self.__hovTime = -1                             # 重置时间
-                    self.__hovHave = 1                              # 设置颜色1
-                else:
-                    self.__hovTime -= 1
-                    mixin1 = pygame.color.Color(self.hovcolor)
-                    mixin2 = pygame.color.Color(self.bg)
-                    self.__bgNow = mixin(mixin2, mixin1, (self.__hovTime / self.transition))
-            else:  # 鼠标不碰撞
-                self.hov = col  #设置状态
-                if self.__hovTime == -1 and self.__hovHave==self.hov:
-                    self.__hovTime = self.transition
-                    self.__bgNow = self.hovcolor
-                    self.__hovHave = 1
-                elif self.__hovTime <= 0 and self.__hovHave!=self.hov:
-                    self.__bgNow = self.bg
-                    self.__hovTime = -1
-                    self.__hovHave = 0
-                else:
-                    self.__hovTime -= 1
-                    mixin1 = pygame.color.Color(self.hovcolor)
-                    mixin2 = pygame.color.Color(self.bg)
-                    self.__bgNow = mixin(mixin2, mixin1, (1 - self.__hovTime / self.transition))
+                self.__bgNow=self.hovcolor
+                if typ == MOUSE_CLICK:
+                    self.__bgNow=self.activecolor
+            else:
+                self.__bgNow=self.bg
 
     def update(self):
-
+        """帧循环"""
         a = self.font.render(self.text, 1, self.fg)
         rect = a.get_size()
 
@@ -160,3 +134,4 @@ class ButtonPy:
         self.surface.blit(self.__middle, (self.pos.x - self.size.x / 2, self.pos.y))
         self.surface.blit(self.__left, (self.pos.x - self.size.x / 2, self.pos.y))
         self.surface.blit(self.__right, (self.pos.x + self.size.x / 2 - self.__right.get_size()[0], self.pos.y))
+        #一堆石山代码

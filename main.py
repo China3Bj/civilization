@@ -11,36 +11,13 @@ from local.color import *
 import ctypes
 
 
-class Scene:
-    def __init__(self, surface, texture, name='.', child=None, dpiscale=1):
-        self.dpiscale = dpiscale
-        self.surface = surface
-        self.texture = texture
-        self.name = name
-        self.children = [] if child is None else child
-
-    def update(self, *args, **kwargs):
-        for i in self.children:
-            i.update(*args, **kwargs)
-
-    def tick(self, typ, *args):
-        for i in self.children:
-            i.tick(typ, *args)
-
-    def __getattr__(self, item):
-        return self.children[item]
-
-
-class WelcomeWindow(Scene):
-    def __init__(self, surface, texture,dpiscale):
-        self.dpiscale=dpiscale
-        button1 = localFunction.ButtonPy(surface, texture, 250 * self.dpiscale, 250 * self.dpiscale, 'Welcome',
-                                         250 * self.dpiscale, 45 * self.dpiscale, fontsize=30 * self.dpiscale)
-        super().__init__(surface, texture, '.welcome', [button1],dpiscale=dpiscale)
-
-
 class MainGame:
     def __init__(self, *args, **kwargs):
+        """
+        这个类是运行主类，执行主程序循环
+        :param args:
+        :param kwargs:
+        """
         try:
             self.__args = args
             self.__kwargs = kwargs
@@ -84,13 +61,23 @@ class MainGame:
             self.welcomewindow = None
             self.welcomewindowActive = True
             self.mousePos = Vector2(0, 0)
+            self.mouseDown = False
+            self.mouseKey = 0
             # Game Init
             self.gameInit()
 
             self.running = True  # running flag
             threading.Thread(target=self.gameTick).start()
+            """
+            主程序循环
+            """
             while self.running:
                 for event in pygame.event.get():
+                    """
+                    事件循环，用if不断遍历运行。
+                    这里的`event.type`是`pygame.constants`中的值
+                    """
+
                     if event.type == QUIT:
                         self.gameQuit()
                     elif event.type == KEYDOWN:
@@ -107,50 +94,103 @@ class MainGame:
                             self.gameQuit()
                     elif event.type == MOUSEMOTION:
                         self.mousePos = Vector2(event.pos)
+                    elif event.type == MOUSEBUTTONDOWN:
+                        self.mouseDown = True
+                        self.mouseKey = event.button
+                    elif event.type == MOUSEBUTTONUP:
+                        self.mouseDown = False
+                        self.mouseKey = 0
 
                 self.surface.fill('white')
                 self.gameUpdate()
                 pygame.display.update()
                 self.clock.tick(config['local']['FPS'])
 
+            """
+            退出程序
+            """
             pygame.quit()
 
             if config['program']['debug']:
                 printf("-" * 10, "EXIT", "-" * 10, color=(LIGHT_BLUE,))
         except:
+            """
+            运行时错误
+            """
             self.gameError(traceback.format_exc())
 
     def gameTick(self):
+        """
+        游戏的“刻”(tick)运行。
+         - 默认是20刻每秒。计量刻速度的单位是TPS(ticks per second)。
+         - 正常游戏运行时AI处理信息的速度。
+         - 也可以时游戏运行时组件(Widget)的反应速度。
+        :return: None
+        """
         while self.running:
             if self.welcomewindowActive:
-                self.welcomewindow.tick(MOUSE_MOTION, self.mousePos)
+                if self.mouseDown:
+                    self.welcomewindow.tick(MOUSE_CLICK, self.mousePos,self.mouseKey)
+                else:
+                    self.welcomewindow.tick(MOUSE_MOTION, self.mousePos)
             self.tick.tick(config['local']['TPS'])
 
     def gameUpdate(self):
+        """
+        游戏的帧数刷新
+         - 与刻运行独立。
+         - 不同电脑的帧数不同，方法的运行速度不同
+        :return: None
+        """
         if self.welcomewindowActive:
             self.welcomewindow.update()
 
     def gameQuit(self):
+        """
+        退出方法。可以用来保存文件会、或者输出log
+        :return: None
+        """
         # todo GameQuit
         debug(col.changeColor('GAME QUIT FUNCTION', (col.GREEN,)))
         self.running = False
 
     def gameInit(self):
+        """
+        游戏初始化方法
+        :return:
+        """
         # todo GameInit
         debug(col.changeColor('GAME INIT FUNCTION', (col.GREEN,)))
         loadFonts()
         pygame.display.set_mode(self.real_size, pygame.RESIZABLE)
         self.assetsImg = loadImg(assetsLink.texture)
-        self.welcomewindow = WelcomeWindow(self.surface, self.assetsImg,self.dpiScl)
+        self.welcomewindow = WelcomeWindow(self, self.assetsImg)
         debug('assetsInfo:' + str(self.assetsImg))
 
     def gameError(self, defence):
+        """
+        游戏错误退出方法
+        :param defence: 错误信息
+        :return: None
+        """
         printf(defence, shown=col.RED, color=(col.LIGHT_RED, col.BOLD_UNDERLINE), type='error')
         showErr(lang.text.errorMessage, defence)
         debug('Runtime Error! ', color=(col.LIGHT_RED,))
         os.kill(os.getpid(), -1)
 
 
+class WelcomeWindow(localFunction.Scene):
+    def __init__(self, master, texture):
+        """
+        欢迎窗口
+        :param master:
+        :param texture:
+        """
+        self.dpiscale = master.dpiScl
+        button1 = localFunction.ButtonPy(master, texture, 250 * self.dpiscale, 250 * self.dpiscale, 'Welcome',
+                                         250 * self.dpiscale, 45 * self.dpiscale, fontsize=30 * self.dpiscale)
+        super().__init__(master, texture, '.welcome', [button1])
+
+
 if __name__ == "__main__":
-    print("denxu")
     MainGame()

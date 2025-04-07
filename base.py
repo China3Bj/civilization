@@ -18,6 +18,11 @@ erronBuffer= (b'\x00\x00\x00\x00\x00\x00\xff\x00\xff\xff\x00\xff\x00\x00\x00\x00
 
 class AssetsDict(dict):
     def __init__(self,*args,**kwargs):
+        """
+        Assets字典，一般存储材质
+        :param args:
+        :param kwargs:
+        """
         self.from_=''
         if 'from_' in kwargs:
             self.from_=kwargs['from_']
@@ -36,6 +41,13 @@ class AssetsDict(dict):
             return _a
 
 class ConfigDict(dict):
+    def __init__(self,*args,**kwargs):
+        """
+        配置字典，存储配置
+        :param args:
+        :param kwargs:
+        """
+        super().__init__(*args,**kwargs)
     def __getattr__(self, item):
         __g=self[item]
         if type(__g)==dict:
@@ -148,19 +160,6 @@ def set_console_color(color):
     ctypes.windll.kernel32.GetConsoleScreenBufferInfo(h, ctypes.byref(csbi))
     # 设置新的文本和背景属性
     ctypes.windll.kernel32.SetConsoleTextAttribute(h, color)
-
-class PyButton:
-    def __init__(self,surface:pygame.Surface,x,y,length):
-        self.surface=surface
-        self.x=x
-        self.y=y
-        self.length=length
-        self.__leftImg=assetsLink.texture.btn.left
-        self.__middleImg=assetsLink.texture.btn.middle
-        self.__rightImg=assetsLink.texture.btn.right
-
-    def update(self):
-        self.surface.blit(self.__leftImg,(self.x,self.y))
 
 
 def printf(*args,**kwargs):
