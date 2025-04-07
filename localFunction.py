@@ -21,6 +21,7 @@ def mixin(col1: pygame.color.Color, col2: pygame.color.Color, perc):
 class Widget:  # todo Widget
     pass
 
+
 class Scene:
     def __init__(self, master, texture=None, name='.', child=None):
         """
@@ -30,7 +31,7 @@ class Scene:
         :param name: 名称（默认为`"."`）
         :param child: 子窗口
         """
-        self.master=master
+        self.master = master
         self.dpiscale = master.dpiScl
         self.surface = master.surface
         self.texture = texture
@@ -49,6 +50,7 @@ class Scene:
 
     def __getattr__(self, item):
         return self.children[item]
+
 
 class ButtonPy:
     def __init__(self, master, texture, x, y, text, length, weight=-1, fg='black', bg='#dddddd', hovcolor='#2070a9',
@@ -116,11 +118,11 @@ class ButtonPy:
             if self.rect is not None:
                 col = self.rect.collidepoint(*args[0])
             if col:  # 如果碰撞
-                self.__bgNow=self.hovcolor
+                self.__bgNow = self.hovcolor
                 if typ == MOUSE_CLICK:
-                    self.__bgNow=self.activecolor
+                    self.__bgNow = self.activecolor
             else:
-                self.__bgNow=self.bg
+                self.__bgNow = self.bg
 
     def update(self):
         """帧循环"""
@@ -128,7 +130,7 @@ class ButtonPy:
         rect = a.get_size()
 
         self.rect = pygame.draw.rect(self.surface, self.__bgNow, (
-        (self.pos.x - self.size.x / 2, self.pos.y), (self.size.x, self.__middle.get_size()[1])))
+            (self.pos.x - self.size.x / 2, self.pos.y), (self.size.x, self.__middle.get_size()[1])))
         self.surface.blit(a, (self.pos.x - rect[0] / 2 + self.__left.get_size()[0] / 2,
                               self.pos.y - rect[1] / 2 + self.__middle.get_size()[1] / 2))
         self.surface.blit(self.__middle, (self.pos.x - self.size.x / 2, self.pos.y))

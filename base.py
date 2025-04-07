@@ -13,94 +13,100 @@ import local.color as col
 from local.local import *
 
 pygame.init()
-erronBuffer= (b'\x00\x00\x00\x00\x00\x00\xff\x00\xff\xff\x00\xff\x00\x00\x00\x00\x00\x00\xff\x00\xff\xff\x00\xff\xff'
-              b'\x00\xff\xff\x00\xff\x00\x00\x00\x00\x00\x00\xff\x00\xff\xff\x00\xff\x00\x00\x00\x00\x00\x00')
+erronBuffer = (b'\x00\x00\x00\x00\x00\x00\xff\x00\xff\xff\x00\xff\x00\x00\x00\x00\x00\x00\xff\x00\xff\xff\x00\xff\xff'
+               b'\x00\xff\xff\x00\xff\x00\x00\x00\x00\x00\x00\xff\x00\xff\xff\x00\xff\x00\x00\x00\x00\x00\x00')
+
 
 class AssetsDict(dict):
-    def __init__(self,*args,**kwargs):
+    def __init__(self, *args, **kwargs):
         """
         Assets字典，一般存储材质
         :param args:
         :param kwargs:
         """
-        self.from_=''
+        self.from_ = ''
         if 'from_' in kwargs:
-            self.from_=kwargs['from_']
+            self.from_ = kwargs['from_']
             del kwargs['from_']
-        super().__init__(*args,**kwargs)
+        super().__init__(*args, **kwargs)
+
     def __getattr__(self, item):
-        __g=self[item]
-        if type(__g)==dict:
-            __g=AssetsDict(__g,from_=self.from_+'.'+item)
+        __g = self[item]
+        if type(__g) == dict:
+            __g = AssetsDict(__g, from_=self.from_ + '.' + item)
         return __g
+
     def __getitem__(self, item):
         try:
             return super().__getitem__(item)
         except:
-            _a=self.from_+'.'+item
+            _a = self.from_ + '.' + item
             return _a
 
+
 class ConfigDict(dict):
-    def __init__(self,*args,**kwargs):
+    def __init__(self, *args, **kwargs):
         """
         配置字典，存储配置
         :param args:
         :param kwargs:
         """
-        super().__init__(*args,**kwargs)
+        super().__init__(*args, **kwargs)
+
     def __getattr__(self, item):
-        __g=self[item]
-        if type(__g)==dict:
-            __g=ConfigDict(__g)
+        __g = self[item]
+        if type(__g) == dict:
+            __g = ConfigDict(__g)
         return __g
 
-def loadImg(assets: AssetsDict|str):
-    if type(assets)==str:
+
+def loadImg(assets: AssetsDict | str):
+    if type(assets) == str:
         try:
             return pygame.image.load(assets)
         except:
             return assets
     else:
-        new=AssetsDict()
-        for index,items in assets.items():
-            new[index]=loadImg(items)
+        new = AssetsDict()
+        for index, items in assets.items():
+            new[index] = loadImg(items)
         return new
 
 
-def showErr(title,err):
-    win=Tk()
+def showErr(title, err):
+    win = Tk()
     win.withdraw()
-    showerror(title,err)
+    showerror(title, err)
+
 
 def setupLang(loc):
-    loc=loc[0]
-    di=list(os.walk('assets/lang'))[0][2]
-    lan='en'
+    loc = loc[0]
+    di = list(os.walk('assets/lang'))[0][2]
+    lan = 'en'
     for i in di:
-        i=i.replace('.json','')
-        if i==loc:
-            lan=i
+        i = i.replace('.json', '')
+        if i == loc:
+            lan = i
             break
-        if  i[:2]==loc:
-            lan=i[:2]
+        if i[:2] == loc:
+            lan = i[:2]
             break
     return lan
 
+
 with open('config.toml', 'rb') as f:
     try:
-        config=ConfigDict(tomllib.load(f))
-        __ass=config['local']['assetsLink']
+        config = ConfigDict(tomllib.load(f))
+        __ass = config['local']['assetsLink']
 
+        local = locale.getdefaultlocale()  #zh-CN
+        lang = config['local']['lang']
+        if lang == 'auto':
+            lang = setupLang(local)
 
-        local=locale.getdefaultlocale()#zh-CN
-        lang=config['local']['lang']
-        if lang=='auto':
-            lang=setupLang(local)
-
-
-        debug=config['program']['debug']
+        debug = config['program']['debug']
         with open(__ass, 'rb') as f2:
-            assetsLink=AssetsDict(json.load(f2))
+            assetsLink = AssetsDict(json.load(f2))
         try:
             with open(f'assets/lang/{lang}.json', 'rb') as f2:
                 lang = AssetsDict(json.load(f2))
@@ -127,10 +133,12 @@ with open('config.toml', 'rb') as f:
         showErr('Runtime Error!', 'Reading "config.toml" error!')
         os.kill(os.getpid(), -1)
 
+
 def loadFonts():
     for _1, _2 in assetsLink.fonts.items():
-        for i in range(20,302,1):
-            fonts[_1+"_"+str(i)] = pygame.font.Font(_2, i)
+        for i in range(20, 302, 1):
+            fonts[_1 + "_" + str(i)] = pygame.font.Font(_2, i)
+
 
 # 设置控制台文本颜色
 STD_OUTPUT_HANDLE = -11
@@ -162,34 +170,36 @@ def set_console_color(color):
     ctypes.windll.kernel32.SetConsoleTextAttribute(h, color)
 
 
-def printf(*args,**kwargs):
+def printf(*args, **kwargs):
     try:
-        typ=kwargs['type']
+        typ = kwargs['type']
         del kwargs['type']
     except KeyError:
-        typ="info"
+        typ = "info"
     try:
-        co=kwargs['color']
+        co = kwargs['color']
         del kwargs['color']
     except KeyError:
-        co=(col.RESET,)
+        co = (col.RESET,)
     try:
-        sep=kwargs['sep']
+        sep = kwargs['sep']
         del kwargs['sep']
     except KeyError:
-        sep=' '
+        sep = ' '
     try:
-        shown=kwargs['shown']
+        shown = kwargs['shown']
         del kwargs['shown']
     except KeyError:
-        shown=col.BLUE
-    g=time.strftime("%Y.%d.%m %X",time.localtime(time.time()))
-    text=sep.join(map(str,args))
-    text=col.changeColor(text,co)
-    print(f'\033[95m[\033[96m{g}\033[95m] \033[{shown}m({typ})\033[0m',text,**kwargs)
+        shown = col.BLUE
+    g = time.strftime("%Y.%d.%m %X", time.localtime(time.time()))
+    text = sep.join(map(str, args))
+    text = col.changeColor(text, co)
+    print(f'\033[95m[\033[96m{g}\033[95m] \033[{shown}m({typ})\033[0m', text, **kwargs)
 
-def debug(*args,**kwargs):
-    if config['program']['debug']:printf(*args,**kwargs,type='debug')
 
-if __name__=="__main__":
+def debug(*args, **kwargs):
+    if config['program']['debug']: printf(*args, **kwargs, type='debug')
+
+
+if __name__ == "__main__":
     pass
