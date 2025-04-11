@@ -5,7 +5,6 @@ assetsLink="assets/assets.json"
 lang='auto'
 
 [program]
-debug=true
 
 [window]
 height=425

@@ -104,7 +104,6 @@ with open('config.toml', 'rb') as f:
         if lang == 'auto':
             lang = setupLang(local)
 
-        debug = config['program']['debug']
         with open(__ass, 'rb') as f2:
             assetsLink = AssetsDict(json.load(f2))
         try:
@@ -196,9 +195,9 @@ def printf(*args, **kwargs):
     text = col.changeColor(text, co)
     print(f'\033[95m[\033[96m{g}\033[95m] \033[{shown}m({typ})\033[0m', text, **kwargs)
 
-
+debug_=False
 def debug(*args, **kwargs):
-    if config['program']['debug']: printf(*args, **kwargs, type='debug')
+    if debug_: printf(*args, **kwargs, type='debug')
 
 
 if __name__ == "__main__":

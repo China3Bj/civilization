@@ -9,6 +9,7 @@ import numba
 import localFunction
 from local.color import *
 import ctypes
+import argparse
 
 
 class MainGame:
@@ -37,7 +38,7 @@ class MainGame:
 
             self.dpiScl = get_scaling_factor()
 
-            if config['program']['debug']:
+            if debug_:
                 printf("-" * 10, "DEBUG VERSION", "-" * 10, color=(col.BLUE,))
                 printf('CHECKING VERSION', color=(col.LIGHT_RED,))
                 printf('pygameVer:', pygame.__version__, color=(col.UNDERLINE,))
@@ -111,7 +112,7 @@ class MainGame:
             """
             pygame.quit()
 
-            if config['program']['debug']:
+            if debug_:
                 printf("-" * 10, "EXIT", "-" * 10, color=(LIGHT_BLUE,))
         except:
             """
@@ -130,7 +131,7 @@ class MainGame:
         while self.running:
             if self.welcomewindowActive:
                 if self.mouseDown:
-                    self.welcomewindow.tick(MOUSE_CLICK, self.mousePos,self.mouseKey)
+                    self.welcomewindow.tick(MOUSE_CLICK, self.mousePos, self.mouseKey)
                 else:
                     self.welcomewindow.tick(MOUSE_MOTION, self.mousePos)
             self.tick.tick(config['local']['TPS'])
@@ -148,7 +149,7 @@ class MainGame:
     def gameQuit(self):
         """
         退出方法。可以用来保存文件会、或者输出log
-        :return: None
+        :return: `None`
         """
         # todo GameQuit
         debug(col.changeColor('GAME QUIT FUNCTION', (col.GREEN,)))
@@ -157,7 +158,7 @@ class MainGame:
     def gameInit(self):
         """
         游戏初始化方法
-        :return:
+        :return: `None`
         """
         # todo GameInit
         debug(col.changeColor('GAME INIT FUNCTION', (col.GREEN,)))
@@ -171,7 +172,7 @@ class MainGame:
         """
         游戏错误退出方法
         :param defence: 错误信息
-        :return: None
+        :return: `None`
         """
         printf(defence, shown=col.RED, color=(col.LIGHT_RED, col.BOLD_UNDERLINE), type='error')
         showErr(lang.text.errorMessage, defence)
@@ -183,14 +184,31 @@ class WelcomeWindow(localFunction.Scene):
     def __init__(self, master, texture):
         """
         欢迎窗口
-        :param master:
-        :param texture:
+        :param master: 父窗口
+        :param texture: 材质, * 虽然我不知道怎么用~ *
         """
         self.dpiscale = master.dpiScl
         button1 = localFunction.ButtonPy(master, texture, 250 * self.dpiscale, 250 * self.dpiscale, 'Welcome',
                                          250 * self.dpiscale, 45 * self.dpiscale, fontsize=30 * self.dpiscale)
         super().__init__(master, texture, '.welcome', [button1])
 
+def main():
+    """
+    Main Function of all the Modules
+    :return: `None`
+    """
+    global debug_
+    p = argparse.ArgumentParser(description="MainGame")
+    p.add_argument('--debug', action='store_true', help="调试模式")
+    p.add_argument('-c', '--code', help=col.changeColor(
+        "???\\84\\? ?\\104\\?\\101\\\u0084\\32\\\\67\\ ??\u0084**(\x78@ \\111\\ ?\\100\\  \033\033 \\101\\?\\102\\????\\32\\???"
+        "\\67\\? "
+        "?\077\\104\\\\101\\??\30 ?\077 \\97\\\\116\\  \145???s\\105\\\\110\\\\103\\dd ??\\33\\??  \\33\\??? "
+        "?? \\33\\",
+        (col.RED, col.BOLD, col.UNDERLINE)))
+    args_ = p.parse_args()
+    debug_ = args_.debug
+    MainGame()
 
 if __name__ == "__main__":
-    MainGame()
+    main()
