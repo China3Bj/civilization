@@ -48,4 +48,4 @@ if __name__=="__main__":
         changeColor('HELLO WORLD', (LIGHT_RED, BOLD_UNDERLINE, FLICKER, LIGHT, THIN_UNDERLINE, ITALIC))
         for col in (RED,)
     ]
-    print()
+    print(lst[0])

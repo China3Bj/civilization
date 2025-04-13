@@ -131,7 +131,8 @@ class MainGame:
         while self.running:
             if self.welcomewindowActive:
                 if self.mouseDown:
-                    self.welcomewindow.tick(MOUSE_CLICK, self.mousePos, self.mouseKey)
+                    self.welcomewindow.tick(MOUSEBUTTONDOWN, self.mousePos, self.mouseKey)
+                    self.welcomewindow.tick(MOUSEBUTTONUP, self.mousePos, self.mouseKey)
                 else:
                     self.welcomewindow.tick(MOUSE_MOTION, self.mousePos)
             self.tick.tick(config['local']['TPS'])
@@ -188,8 +189,8 @@ class WelcomeWindow(localFunction.Scene):
         :param texture: 材质, * 虽然我不知道怎么用~ *
         """
         self.dpiscale = master.dpiScl
-        button1 = localFunction.ButtonPy(master, texture, 250 * self.dpiscale, 250 * self.dpiscale, 'Welcome',
-                                         250 * self.dpiscale, 45 * self.dpiscale, fontsize=30 * self.dpiscale)
+        button1 = localFunction.ButtonPy(master, texture, 250 * self.dpiscale, 250 * self.dpiscale, 'Hello World',
+                                         250 * self.dpiscale, 45 * self.dpiscale, fontsize=30 * self.dpiscale,command=lambda :print('Hello World'))
         super().__init__(master, texture, '.welcome', [button1])
 
 def main():

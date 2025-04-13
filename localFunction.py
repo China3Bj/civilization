@@ -64,7 +64,7 @@ class Scene:
 
 class ButtonPy:
     def __init__(self, master, texture, x, y, text, length, weight=-1, fg='black', bg='#dddddd', hovcolor='#2070a9',
-                 activecolor='#606069', fontsize=30):
+                 activecolor='#606069', fontsize=30,command=None):
         """
         按钮类，一堆石山。。。。。
          - 石山石山石山石 山石 山石山石 山石山 石山石山  石山石山石山石山石山石 山石山石山石山石 山石山石山 石 山石 山石 山
@@ -81,6 +81,7 @@ class ButtonPy:
         :param activecolor: 执行颜色
         :param fontsize: 字体
         """
+
         self.rect: pygame.rect.Rect | pygame.rect.RectType | None = None
         self.scale = 1
         self.transition = 20  #tick
@@ -94,6 +95,7 @@ class ButtonPy:
         self.bg = bg
         self.hovcolor = hovcolor
         self.activecolor = activecolor
+        self.command=command
 
         self.__bgNow = self.bg
         self.active = 0
@@ -132,6 +134,8 @@ class ButtonPy:
                 self.__bgNow = mixin(pygame.color.Color(self.__bgNow),pygame.color.Color(self.hovcolor),0.5)
                 if typ == MOUSE_CLICK:
                     self.__bgNow = mixin(pygame.color.Color(self.__bgNow),pygame.color.Color(self.activecolor),0.5)
+                    if self.command is not None:
+                        self.command()
             else:
                 self.__bgNow = mixin(pygame.color.Color(self.__bgNow),pygame.color.Color(self.bg),0.5)
 
