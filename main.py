@@ -188,7 +188,7 @@ class WelcomeWindow(localFunction.Scene):
         :param texture: 材质, * 虽然我不知道怎么用~ *
         """
         self.dpiscale = master.dpiScl
-        button1 = localFunction.ButtonPy(master, texture, 250 * self.dpiscale, 250 * self.dpiscale, 'Hello World',
+        button1 = localFunction.ButtonPy(master, texture, 250 * self.dpiscale, 250 * self.dpiscale, '1',
                                          250 * self.dpiscale, 45 * self.dpiscale, fontsize=30 * self.dpiscale,command=lambda :print('Hello World'))
         super().__init__(master, texture, '.welcome', [button1])
 
