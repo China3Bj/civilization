@@ -131,8 +131,7 @@ class MainGame:
         while self.running:
             if self.welcomewindowActive:
                 if self.mouseDown:
-                    self.welcomewindow.tick(MOUSEBUTTONDOWN, self.mousePos, self.mouseKey)
-                    self.welcomewindow.tick(MOUSEBUTTONUP, self.mousePos, self.mouseKey)
+                    self.welcomewindow.tick(MOUSE_CLICK, self.mousePos, self.mouseKey)
                 else:
                     self.welcomewindow.tick(MOUSE_MOTION, self.mousePos)
             self.tick.tick(config['local']['TPS'])
