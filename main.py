@@ -93,6 +93,9 @@ class MainGame:
                             pygame.display.toggle_fullscreen()
                         elif event.key == K_ESCAPE:
                             self.gameQuit()
+                    elif event.type == WINDOWRESIZED:
+                        self.real_size=event.x,event.y
+                        printf(self.real_size)
                     elif event.type == MOUSEMOTION:
                         self.mousePos = Vector2(event.pos)
                     elif event.type == MOUSEBUTTONDOWN:
@@ -188,9 +191,18 @@ class WelcomeWindow(localFunction.Scene):
         :param texture: 材质, * 虽然我不知道怎么用~ *
         """
         self.dpiscale = master.dpiScl
-        button1 = localFunction.ButtonPy(master, texture, 250 * self.dpiscale, 250 * self.dpiscale, '1',
-                                         250 * self.dpiscale, 45 * self.dpiscale, fontsize=30 * self.dpiscale,command=lambda :print('Hello World'))
-        super().__init__(master, texture, '.welcome', [button1])
+        self.i=0
+        def g():
+            self.i+=1
+            printf(self.i)
+
+        button1 = localFunction.ButtonPy(master, texture, master.real_size[0]/2 * self.dpiscale, 250 * self.dpiscale, '123456789',
+                                         250 * self.dpiscale, 45 * self.dpiscale, fontsize=30 * self.dpiscale,command=g)
+
+
+        label1 = localFunction.LabelPy(master, 250 * self.dpiscale, 100 * self.dpiscale, '123456789',
+                                         250 * self.dpiscale, 45 * self.dpiscale, fontsize=30 * self.dpiscale)
+        super().__init__(master, texture, '.welcome', [button1,label1])
 
 def main():
     """
@@ -201,10 +213,7 @@ def main():
     p = argparse.ArgumentParser(description="MainGame")
     p.add_argument('--debug', action='store_true', help="调试模式")
     p.add_argument('-c', '--code', help=col.changeColor(
-        "???\\84\\? ?\\104\\?\\101\\\u0084\\32\\\\67\\ ??\u0084**(\x78@ \\111\\ ?\\100\\  \033\033 \\101\\?\\102\\????\\32\\???"
-        "\\67\\? "
-        "?\077\\104\\\\101\\??\30 ?\077 \\97\\\\116\\  \145???s\\105\\\\110\\\\103\\dd ??\\33\\??  \\33\\??? "
-        "?? \\33\\",
+        "???",
         (col.RED, col.BOLD, col.UNDERLINE)))
     args_ = p.parse_args()
     debug_ = args_.debug

@@ -66,8 +66,7 @@ class ButtonPy:
     def __init__(self, master, texture, x, y, text, length, weight=-1, fg='black', bg='#dddddd', hovcolor='#2070a9',
                  activecolor='#606069', fontsize=30,command=None):
         """
-        按钮类，一堆石山。。。。。
-         - 石山石山石山石 山石 山石山石 山石山 石山石山  石山石山石山石山石山石 山石山石山石山石 山石山石山 石 山石 山石 山
+        按钮类
         :param master: 父窗口
         :param texture: 按钮材质
         :param x: 坐标x
@@ -80,8 +79,11 @@ class ButtonPy:
         :param hovcolor: 悬挂颜色
         :param activecolor: 执行颜色
         :param fontsize: 字体
+        :param command: 执行命令
         """
 
+        self.is_click = False
+        self.__bgAlpha = 0
         self.rect: pygame.rect.Rect | pygame.rect.RectType | None = None
         self.scale = 1
         self.transition = 20  #tick
@@ -89,7 +91,7 @@ class ButtonPy:
         self.center = pygame.Vector2(self.surface.get_size()) / 2
         self.texture = texture
         self.pos = pygame.Vector2(x, y)
-        self.text = text
+        self.text = text+"  "
         self.size = pygame.Vector2(length, weight)
         self.fg = fg
         self.bg = bg
@@ -132,23 +134,98 @@ class ButtonPy:
                 col = self.rect.collidepoint(*args[0])
             if col:  # 如果碰撞
                 self.__bgNow = mixin(pygame.color.Color(self.__bgNow),pygame.color.Color(self.hovcolor),0.5)
+                self.__bgAlpha=self.__bgAlpha * 0.5 + 100
                 if typ == MOUSE_CLICK:
                     self.__bgNow = mixin(pygame.color.Color(self.__bgNow),pygame.color.Color(self.activecolor),0.5)
+                    if not self.is_click:self.is_click=True
+
+                elif self.is_click:
+                    self.is_click=False
                     if self.command is not None:
                         self.command()
             else:
+                self.is_click=False
                 self.__bgNow = mixin(pygame.color.Color(self.__bgNow),pygame.color.Color(self.bg),0.5)
+                self.__bgAlpha=self.__bgAlpha * 0.5
+            return
+        self.is_click=False
+
+    def update(self):
+        """帧循环"""
+        a = self.font.render(self.text, 1, self.fg)
+
+        self.surface.blit(self.__middle, (self.pos.x - self.size.x / 2, self.pos.y))
+        self.surface.blit(self.__left, (self.pos.x - self.size.x / 2, self.pos.y))
+        self.surface.blit(self.__right, (self.pos.x + self.size.x / 2 - self.__right.get_size()[0], self.pos.y))
+
+        rect=pygame.Surface((self.size.x, self.__middle.get_size()[1]))
+        pygame.draw.rect(rect, self.__bgNow, (
+            (0,0), (self.size.x, self.__middle.get_size()[1])))
+
+        rect.set_alpha(self.__bgAlpha)
+        self.rect=pygame.rect.Rect(((self.pos.x - self.size.x / 2, self.pos.y),(self.size.x, self.__middle.get_size()[1])))
+
+        self.surface.blit(rect, (self.pos.x - self.size.x / 2, self.pos.y))
+
+
+        rect = a.get_size()
+        self.surface.blit(a, (self.pos.x - rect[0] / 2 + self.__left.get_size()[0] / 2,
+                              self.pos.y - rect[1] / 2 + self.__middle.get_size()[1] / 2))
+
+
+        #一堆石山代码
+
+
+class LabelPy:
+    def __init__(self, master, x, y, text, length, weight=-1, fg='black', bg=None, fontsize=30):
+        """
+        标签类
+        :param master: 父窗口
+        :param x: 坐标x
+        :param y: 坐标y
+        :param text: 文本
+        :param length: 长度
+        :param weight: 宽度
+        :param fg: 前景色
+        :param bg: 背景色
+        :param fontsize: 字体
+        """
+
+        self.rect: pygame.rect.Rect | pygame.rect.RectType | None = None
+        self.scale = 1
+        self.transition = 20  #tick
+        self.surface: pygame.Surface = master.surface
+        self.center = pygame.Vector2(self.surface.get_size()) / 2
+        self.pos = pygame.Vector2(x, y)
+        self.text = text
+        self.size = pygame.Vector2(length, weight)
+        self.fg = fg
+        self.bg = bg
+
+        self.font: pygame.font.Font = fonts['arial_' + str(int(fontsize))]
+
+    def setscale(self, scale, center):
+        self.scale = scale
+        self.center = pygame.Vector2(center)
+
+    def tick(self, typ, *args):
+        """
+        刻循环
+        :param typ: 刻循环类型(无)
+        :param args:
+        :return: `None`
+        """
+        return
 
     def update(self):
         """帧循环"""
         a = self.font.render(self.text, 1, self.fg)
         rect = a.get_size()
 
-        self.rect = pygame.draw.rect(self.surface, self.__bgNow, (
-            (self.pos.x - self.size.x / 2, self.pos.y), (self.size.x, self.__middle.get_size()[1])))
-        self.surface.blit(a, (self.pos.x - rect[0] / 2 + self.__left.get_size()[0] / 2,
-                              self.pos.y - rect[1] / 2 + self.__middle.get_size()[1] / 2))
-        self.surface.blit(self.__middle, (self.pos.x - self.size.x / 2, self.pos.y))
-        self.surface.blit(self.__left, (self.pos.x - self.size.x / 2, self.pos.y))
-        self.surface.blit(self.__right, (self.pos.x + self.size.x / 2 - self.__right.get_size()[0], self.pos.y))
+        if self.bg is not None:
+            self.rect = pygame.draw.rect(self.surface, self.bg, (
+                (self.pos.x - self.size.x / 2, self.pos.y), (self.size.x, self.size.y)))
+
+        self.surface.blit(a, (self.pos.x - rect[0] / 2,
+                              self.pos.y - rect[1] / 2 + self.size.y/2))
         #一堆石山代码
